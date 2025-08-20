@@ -7,6 +7,8 @@ general rules of DFA (take get from the graph):
 general notes for program
 - read the file character by character
 
+why did it use my company email
+
 """
 
 import sys
