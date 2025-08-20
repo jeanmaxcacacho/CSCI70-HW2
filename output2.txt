@@ -1,0 +1,6 @@
+NUM	234
+MINUS	-
+PLUS	+
+MINUS	-
+PLUS	+
+Lexical Error reading character "a"
