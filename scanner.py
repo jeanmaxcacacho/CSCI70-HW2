@@ -1,21 +1,17 @@
 """
-general rules of DFA (take get from the graph):
-- starting state is any whitespace character
+general rules of DFA (from the graph):
+- starting state is any whitespace/empty character
 - alphabetic characters are not part of any valid tokens
 - the only valid tokens are ("==", "+", "-", and [0-9])
 
 general notes for program
 - read the file character by character
-
-why did it use my company email
-
+- write buffers to file not characters, flush per transition
 """
 
 import sys
 import io
-import string  # string.isalpha(), string.isnum()
 from enum import Enum
-
 
 if len(sys.argv) != 2:
     print(f"[ERROR] Usage: python {sys.argv[0]} <input_file>")
@@ -32,8 +28,19 @@ class State(Enum):  # system can only be any one of these states at a time
     EOF = "EOF"
 
 
+def group_char(c):  # utility function to get character key
+    if c.isnumeric():
+        return "numeric"
+    elif c in ("=", "+", "-"):
+        return c
+    elif c.isspace():
+        return "blank"
+    else:
+        return "other"
+
+
 # transitions[current_state][char] -> (next_state, emit_token, need_pushback)
-transitions = {
+t_table = {
     State.BLANK: {
         "blank": (State.BLANK, None, False),
         "other": (State.ERROR, None, False),
@@ -52,8 +59,13 @@ transitions = {
         "numeric": (State.NUM, None, False),
     },
     State.ASSIGN: {
-        "other": (State.ERROR, None, False),  # anything else that isn't '='
-        "=": (State.ASSIGN, "EQUALS", False),
+        "blank": (State.ERROR, None, False),
+        "other": (State.ERROR, None, False),
+        "": (State.ERROR, None, False),
+        "=": (State.ASSIGN, None, True),
+        "+": (State.ERROR, None, True),
+        "-": (State.ERROR, None, True),
+        "numeric": (State.NUM, None, False),
     },
     State.PLUS: {  # digits can follow one after another
         "blank": (State.BLANK, None, False),
@@ -77,27 +89,33 @@ transitions = {
 
 
 current_state = State.BLANK
-need_pushback = False
 current_buffer = ""
 current_character = ""
 
 input_file = io.open(sys.argv[1], "r")
-output_file = io.open("output.txt", "w")
+# output_file = io.open("output.txt", "w")
+
 
 # TODO: finish driver loop
 while current_state not in (State.ERROR, State.EOF):
-    # read a character, assign currentCharacter
-    currentCharacter = input_file.read(1)
-    if currentCharacter == "":
-        currentState = State.EOF
-    # write to buffer, if state transition happens flush buffer to output_file
-    # output_file.write(currentCharacter)
+    # read a character, assign current_character
+    current_character = input_file.read(1)
+    if current_character == "":
+        current_state = State.EOF
+        break
+    # do state transitions by invoking transition table
+    _state, _token, _pushback = t_table[current_state][group_char(
+        current_character)]
+    current_state = _state  # transition to next state
+    print(f"STATE: {current_state} CHAR: {current_character}")
 
+
+# program egress
 if current_state == State.ERROR:
-    print(f"Lexical Error reading character {current_character}")
+    print(f"Lexical Error reading character \"{current_character}\"")
 
 # close io streams since we're good software engineers
-input_file.close()
-output_file.close()
+# input_file.close()
+# output_file.close()
 
-sys.exit()
+sys.exit(0)
