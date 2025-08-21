@@ -93,6 +93,11 @@ while current_state not in (State.ERROR, State.EOF):
     # write to buffer, if state transition happens flush buffer to output_file
     # output_file.write(currentCharacter)
 
+if current_state == State.ERROR:
+    print(f"Lexical Error reading character {current_character}")
+
+# close io streams since we're good software engineers
 input_file.close()
 output_file.close()
+
 sys.exit()
