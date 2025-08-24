@@ -2,8 +2,8 @@ import sys
 import io
 from enum import Enum
 
-if len(sys.argv) != 2:
-    print(f"Usage: python {sys.argv[0]} <input_file>")
+if len(sys.argv) != 3:
+    print(f"Usage: python {sys.argv[0]} <input_file> <output_file>")
     sys.exit(1)
 
 
@@ -130,10 +130,51 @@ t_table = {
 input_file = io.open(sys.argv[1], "r")
 output_file = io.open(sys.argv[2], "w")
 
-_char = input_file.read(1)  # get first char
+# enter start
+_state = State._A
+_buffer = ""
+_char = None
+_pushback_char = None
 
-_buffer = ""  # instantiate char stream
-_buffer += _char  # flush _buffer not _char into output_file
+while _state not in (State.EOF, State.ERROR):
+    # don't move forward if there's 'backlog'
+    if _pushback_char is not None:
+        _char = _pushback_char
+        _pushback_char = None
+    else:
+        _char = input_file.read(1)
+
+    # invalid transition
+    _char_grp = gk(_char)
+    if _char_grp not in t_table[_state]:
+        _state = State.ERROR
+        output_file.write("this transition wasn't accounted for")
+        break
+
+    next_state, emit, pushback = t_table[_state][_char_grp]
+
+    if emit is not None:
+        if emit == "NUM":
+            output_file.write(f"{emit}     {_buffer}\n")
+        else:
+            output_file.write(
+                f"{emit}     {_char if emit in ('PLUS', 'MINUS') else ''}"
+            )
+        _buffer = ""
+
+    if pushback:
+        _pushback_char = _char
+    else:
+        if _state == State._B and _char_grp == "numeric":
+            _buffer += _char
+
+    _state = next_state
+
+if _state == State.ERROR:
+    if _char != "" and _char is not None:
+        output_file.write(f"Lexical Error reading character \"{_char}\"\n")
+    else:
+        output_file.write("Lexical Error but unknown character \n")
 
 input_file.close()
 output_file.close()
