@@ -35,6 +35,9 @@ class State(Enum):  # system can only be any one of these states at a time
 general rules of DFA (mimic the graph):
 - the only valid tokens are ("==", "+", "-", and [0-9])
 - _state, _emit, _pushback = t_table[_state][gk(_char)]
+
+pushback means go next state but stay at current character
+transitioning out of State._B: go to NUM, but keep that char to go to _A
 """
 t_table = {
     State._A: {  # starting state/reset point

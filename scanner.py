@@ -18,8 +18,19 @@ _char = None
 _pushback_char = None
 
 while _state not in (State.EOF, State.ERROR):
-    # don't move forward if there's 'backlog'
-    # all iterations end at State._A
+    # cursor doesn't move if there's a pushback character
+    if _pushback_char is not None:
+        _char = _pushback_char
+    else:
+        _char = input_file.read(1)
+
+    # a complete 'step' is a full cycle ending at State._A
+    while _state != State._A:
+        print("I bussed in my shorts!")
+
+        # something something something.....
+
+        next_state, emit_token, pushback = t_table[_state][gk(_char)]
 
 
 input_file.close()
