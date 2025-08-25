@@ -1,39 +1,61 @@
 import sys
 import io
-
 from utils import gk, State, t_table
 
 if len(sys.argv) != 3:
     print(f"Usage: python {sys.argv[0]} <input_file> <output_file>")
     sys.exit(1)
 
-# TODO: program execution
 input_file = io.open(sys.argv[1], "r")
+input_text = input_file.read()
+input_file.close()
+
 output_file = io.open(sys.argv[2], "w")
 
-# enter start
 _state = State._A
 _buffer = ""
-_char = None
-_pushback_char = None
+position = 0
+tokens = []
 
-while _state not in (State.EOF, State.ERROR):
-    # cursor doesn't move if there's a pushback character
-    if _pushback_char is not None:
-        _char = _pushback_char
+while _state not in [State.EOF, State.ERROR]:
+    if position < len(input_text):
+        _char = input_text[position]
     else:
-        _char = input_file.read(1)
+        _char = ""  # EOF
 
-    # a complete 'step' is a full cycle ending at State._A
-    while _state != State._A:
-        print("I bussed in my shorts!")
+    char_key = gk(_char)
+    next_state, emit, pushback = t_table[_state][char_key]
 
-        # something something something.....
+    if not pushback:
+        # normal character consumption
+        if _state == State._A:
+            if char_key == "numeric":
+                _buffer = _char
+            elif char_key in ("+", "-", "="):
+                _buffer = _char
+        # whitespace and terminal states don't need buffering
+        elif _state == State._B and char_key == "numeric":
+            _buffer += _char
+        elif _state == State._E and char_key == "=":
+            _buffer += _char
 
-        next_state, emit_token, pushback = t_table[_state][gk(_char)]
+        position += 1
 
+    if emit:
+        tokens.append((emit, _buffer))
+        _buffer = ""
 
-input_file.close()
-output_file.close()
+    _state = next_state
+
+# exit sequence
+for token_type, token_value in tokens:
+    # print(f"{token_type}\t{token_value}")
+    output_file.write(f"{token_type}\t{token_value}\n")
+
+# error egress
+if _state == State.ERROR:
+    # print(f"Lexical Error reading character \"{_char}\"")
+    output_file.write(f"{token_type}\t{token_value}\n")
+    sys.exit(1)
 
 sys.exit(0)

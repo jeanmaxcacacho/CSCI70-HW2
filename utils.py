@@ -4,7 +4,7 @@ from enum import Enum
 def gk(_char):  # get key to shove in to t_table
     if _char == "":
         return "EOF"
-    elif _char.isnumeric():
+    elif _char.isdigit():
         return "numeric"
     elif _char in ("=", "+", "-", ""):
         return _char
@@ -31,14 +31,6 @@ class State(Enum):  # system can only be any one of these states at a time
     NUM = "NUM"
 
 
-"""
-general rules of DFA (mimic the graph):
-- the only valid tokens are ("==", "+", "-", and [0-9])
-- _state, _emit, _pushback = t_table[_state][gk(_char)]
-
-pushback means go next state but stay at current character
-transitioning out of State._B: go to NUM, but keep that char to go to _A
-"""
 t_table = {
     State._A: {  # starting state/reset point
         "EOF": (State.EOF, None, False),
@@ -46,8 +38,8 @@ t_table = {
         "whitespace": (State._A, None, False),
         "numeric": (State._B, None, False),
         "=": (State._E, None, False),
-        "+": (State.PLUS, None, False),
-        "-": (State.MINUS, None, False),
+        "+": (State.PLUS, "PLUS", False),
+        "-": (State.MINUS, "MINUS", False),
     },
     State._B: {
         "EOF": (State.NUM, "NUM", False),
@@ -68,40 +60,40 @@ t_table = {
         "-": (State.ERROR, None, False),
     },
     State.PLUS: {
-        "EOF": (State._A, None, False),
-        "other": (State._A, None, False),
-        "whitespace": (State._A, None, False),
-        "numeric": (State._A, None, False),
-        "=": (State._A, None, False),
-        "+": (State._A, None, False),
-        "-": (State._A, None, False),
+        "EOF": (State._A, None, True),
+        "other": (State._A, None, True),
+        "whitespace": (State._A, None, True),
+        "numeric": (State._A, None, True),
+        "=": (State._A, None, True),
+        "+": (State._A, None, True),
+        "-": (State._A, None, True),
     },
     State.MINUS: {
-        "EOF": (State._A, None, False),
-        "other": (State._A, None, False),
-        "whitespace": (State._A, None, False),
-        "numeric": (State._A, None, False),
-        "=": (State._A, None, False),
-        "+": (State._A, None, False),
-        "-": (State._A, None, False),
+        "EOF": (State._A, None, True),
+        "other": (State._A, None, True),
+        "whitespace": (State._A, None, True),
+        "numeric": (State._A, None, True),
+        "=": (State._A, None, True),
+        "+": (State._A, None, True),
+        "-": (State._A, None, True),
     },
     State.ASSIGN: {
-        "EOF": (State._A, None, False),
-        "other": (State._A, None, False),
-        "whitespace": (State._A, None, False),
-        "numeric": (State._A, None, False),
-        "=": (State._A, None, False),
-        "+": (State._A, None, False),
-        "-": (State._A, None, False),
+        "EOF": (State._A, None, True),
+        "other": (State._A, None, True),
+        "whitespace": (State._A, None, True),
+        "numeric": (State._A, None, True),
+        "=": (State._A, None, True),
+        "+": (State._A, None, True),
+        "-": (State._A, None, True),
     },
     State.NUM: {
-        "EOF": (State._A, None, False),
-        "other": (State._A, None, False),
-        "whitespace": (State._A, None, False),
-        "numeric": (State._A, None, False),
-        "=": (State._A, None, False),
-        "+": (State._A, None, False),
-        "-": (State._A, None, False),
+        "EOF": (State._A, None, True),
+        "other": (State._A, None, True),
+        "whitespace": (State._A, None, True),
+        "numeric": (State._A, None, True),
+        "=": (State._A, None, True),
+        "+": (State._A, None, True),
+        "-": (State._A, None, True),
     },
     State.ERROR: {  # if encounter either ERROR/EOF stay there forever
         "EOF": (State.ERROR, None, False),
