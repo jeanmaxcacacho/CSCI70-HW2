@@ -3,7 +3,7 @@ THIS IS THE MAIN FILE, RUN THE PROGRAM VIA:
 $ python3 scanner.py <input_file> <output_file>
 
 INSPECT PROGRAM OUTPUT BY OPENING <output_file>,
-ON UNIX-LIKE SYSTEMS DO THIS WITH:
+ON BASH/WSL DO THIS WITH:
 $ cat <output_file>
 """
 
@@ -30,7 +30,7 @@ tokens = []
 
 # main driver loop
 while _state not in [State.EOF, State.ERROR]:
-    # iterate through file
+    # iterate through input char stream
     if position < len(input_text):
         _char = input_text[position]
     else:
@@ -40,6 +40,7 @@ while _state not in [State.EOF, State.ERROR]:
     char_key = gk(_char)
     next_state, emit, pushback = t_table[_state][char_key]
 
+    # if there's pusback, wait until next state transition to consume _char
     if not pushback:
         # normal character consumption
         if _state == State._A:
@@ -53,12 +54,15 @@ while _state not in [State.EOF, State.ERROR]:
         elif _state == State._E and char_key == "=":
             _buffer += _char
 
+        # move forward
         position += 1
 
+    # build output_file
     if emit:
         tokens.append((emit, _buffer))
         _buffer = ""
 
+    # advance state
     _state = next_state
 
 # exit sequence
