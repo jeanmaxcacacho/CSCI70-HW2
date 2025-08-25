@@ -1,3 +1,12 @@
+"""
+THIS IS THE MAIN FILE, RUN THE PROGRAM VIA:
+$ python3 scanner.py <input_file> <output_file>
+
+INSPECT PROGRAM OUTPUT BY OPENING <output_file>,
+ON UNIX-LIKE SYSTEMS DO THIS WITH:
+$ cat <output_file>
+"""
+
 import sys
 import io
 from utils import gk, State, t_table
@@ -6,23 +15,28 @@ if len(sys.argv) != 3:
     print(f"Usage: python {sys.argv[0]} <input_file> <output_file>")
     sys.exit(1)
 
+# open IO streams
 input_file = io.open(sys.argv[1], "r")
 input_text = input_file.read()
 input_file.close()
 
 output_file = io.open(sys.argv[2], "w")
 
+# initialize `Start` state
 _state = State._A
 _buffer = ""
 position = 0
 tokens = []
 
+# main driver loop
 while _state not in [State.EOF, State.ERROR]:
+    # iterate through file
     if position < len(input_text):
         _char = input_text[position]
     else:
         _char = ""  # EOF
 
+    # key into next state
     char_key = gk(_char)
     next_state, emit, pushback = t_table[_state][char_key]
 

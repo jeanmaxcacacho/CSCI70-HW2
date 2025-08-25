@@ -1,3 +1,10 @@
+"""
+THIS FILE CONTAINS UTILITIES USED BY THE MAIN FILE:
+- `gk` HELPER FUNCTION TO CONVERT CHARACTERS TO TRANSITION TABLE KEYS
+- `State(Enum)` CLASS TO REPRESENT STATES
+- `t_table` DICTIONARY WHICH DICTATES TRANSITION RULES AS PER THE DFA GRAPH
+"""
+
 from enum import Enum
 
 
@@ -31,6 +38,7 @@ class State(Enum):  # system can only be any one of these states at a time
     NUM = "NUM"
 
 
+# next_state, emit, pushback = t_table[current_state][current_chracter]
 t_table = {
     State._A: {  # starting state/reset point
         "EOF": (State.EOF, None, False),
