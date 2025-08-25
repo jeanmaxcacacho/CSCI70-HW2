@@ -48,14 +48,19 @@ while _state not in [State.EOF, State.ERROR]:
     _state = next_state
 
 # exit sequence
-for token_type, token_value in tokens:
-    # print(f"{token_type}\t{token_value}")
+for i, (token_type, token_value) in enumerate(tokens):
+    # if i == len(tokens)-1:
+    #     output_file.write(f"{token_type}\t{token_value}")
+    # else:
     output_file.write(f"{token_type}\t{token_value}\n")
 
 # error egress
 if _state == State.ERROR:
-    # print(f"Lexical Error reading character \"{_char}\"")
-    output_file.write(f"{token_type}\t{token_value}\n")
+    # if tokens:
+    #     output_file.write("\n")
+    output_file.write(f"Lexical Error reading character \"{_char}\"\n")
+    output_file.close()
     sys.exit(1)
 
+output_file.close()
 sys.exit(0)
